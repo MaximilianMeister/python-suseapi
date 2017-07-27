@@ -147,7 +147,7 @@ read Bugzilla and SOAP service for writing to Bugzilla.
 
       Returns list of SRs associated with given bug.
     
-   .. method:: update_bug(bugid, callback=None, callback_param=None, whiteboard_add=None, whiteboard_remove=None, \*\*kwargs)
+   .. method:: update_bug(bugid, callback=None, callback_param=None, whiteboard_add=None, whiteboard_remove=None, keywords_add=None, keywords_remove=None, \*\*kwargs)
 
       :param bugid: Bug id
       :type bugid: integer

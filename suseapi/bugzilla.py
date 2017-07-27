@@ -618,7 +618,8 @@ class Bugzilla(WebScraper):
             raise BugzillaUpdateError('Failed to parse HTML to update bug!')
 
     def update_bug(self, bugid, callback=None, callback_param=None,
-                   whiteboard_add=None, whiteboard_remove=None, **kwargs):
+                   whiteboard_add=None, whiteboard_remove=None,
+                   keywords_add=None, keywords_remove=None, **kwargs):
         '''
         Updates bugzilla.
         '''
@@ -627,7 +628,9 @@ class Bugzilla(WebScraper):
         changes = False
 
         # Do not add ourselves to CC when setting whiteboard
-        if ((whiteboard_add is not None or whiteboard_remove is not None) and
+        # or changing keywords
+        if ((whiteboard_add is not None or whiteboard_remove is not None or
+                keywords_add is not None or keywords_remove is not None) and
                 'addselfcc' not in kwargs):
             kwargs['addselfcc'] = []
 
@@ -652,6 +655,13 @@ class Bugzilla(WebScraper):
             changes |= self._update_bug_whiteboard(
                 whiteboard_remove,
                 whiteboard_add
+            )
+
+        # Keywords manipulations
+        if keywords_add is not None or keywords_remove is not None:
+            changes |= self._update_bug_keywords(
+                keywords_remove,
+                keywords_add
             )
 
         # Retrun on no changes
@@ -683,6 +693,24 @@ class Bugzilla(WebScraper):
         changes = (self.browser['status_whiteboard'] != whiteboard)
 
         self.browser['status_whiteboard'] = whiteboard
+
+        return changes
+
+    def _update_bug_keywords(self, remove, add):
+        '''
+        Callback for changing bug keywords.
+        '''
+        keywords = self.browser['keywords']
+
+        if remove is not None and remove in keywords:
+            keywords = keywords.replace(remove, '')
+
+        if add is not None and add not in keywords:
+            keywords = '%s %s' % (keywords, add)
+
+        changes = (self.browser['keywords'] != keywords)
+
+        self.browser['keywords'] = keywords
 
         return changes
 
